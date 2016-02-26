@@ -8,7 +8,7 @@ public Plugin myinfo =
 {
 	name = "[GFL] MOTD Links",
 	author = "Roy (Christian Deacon)",
-	description = "Choices which MOTD shows for each player.",
+	description = "Dynamic MOTD links.",
 	version = "1.0.0",
 	url = "http://GFLClan.com/"
 };
@@ -54,12 +54,12 @@ public void OnClientPutInServer(int iClient)
 	if (HasPermission(iClient, "t"))
 	{
 		/* User is a member. Use the NormalMOTD ConVar's value as the MOTD link. */
-		ShowMOTDPanel(iClient, "GFLClan.com", g_sNormalMOTD, MOTDPANEL_TYPE_URL);
+		showMOTD(iClient, g_sNormalMOTD, "GFLClan.com");
 	}
 	else
 	{
 		/* User isn't a Member+. Give them the ads link. */
-		ShowMOTDPanel(iClient, "Apply for Membership @ GFLClan.com to remove MOTD ads!", VPPADSURL, MOTDPANEL_TYPE_URL);
+		showMOTD(iClient, VPPADSURL, "Apply for Membership @ GFLClan.com to remove MOTD ads!");
 	}
 }
 
@@ -67,7 +67,7 @@ public void OnClientPutInServer(int iClient)
 public Action Command_Ads(int iClient, int iArgs)
 {
 	/* Display the ads window. */
-	ShowMOTDPanel(iClient, "Thank you for supporting us!", VPPADSURL, MOTDPANEL_TYPE_URL);
+	showMOTD(iClient, VPPADSURL, "Thank you for supporting us!");
 	
 	/* Reply to the client. */
 	CReplyToCommand(iClient, "%t", "AdSupport");
@@ -98,4 +98,19 @@ stock bool HasPermission(int iClient, char[] sFlagString)
 	}
 
 	return false;
+}
+
+/* Shows the MOTD URL. */
+stock bool showMOTD(int iClient, const char[] sURL, const char[] sTitle)
+{
+	/* Check if the client is valid. */
+	if (!IsClientInGame(iClient))
+	{
+		return false;
+	}
+	
+	/* Display the MOTD window. */
+	ShowMOTDPanel(iClient, sTitle, sURL, MOTDPANEL_TYPE_URL);
+	
+	return true;
 }

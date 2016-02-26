@@ -1,5 +1,6 @@
 #include <sourcemod>
 #include <sdktools>
+#include <multicolors>
 
 #define VPPADSURL "http://vppgamingnetwork.com/Client/Content/1151"
 
@@ -25,6 +26,12 @@ public void OnPluginStart()
 	
 	/* Changes. */
 	HookConVarChange(g_hNormalMOTD, CVarChanged);
+	
+	/* Commands. */
+	RegConsoleCmd("sm_ads", Command_Ads);
+	
+	/* Load the translations file. */
+	LoadTranslations("gflmotd.phrases.txt");
 	
 	/* Execute a config. */
 	AutoExecConfig(true, "plugin.gfl-motd");
@@ -54,6 +61,18 @@ public void OnClientPutInServer(int iClient)
 		/* User isn't a Member+. Give them the ads link. */
 		ShowMOTDPanel(iClient, "Apply for Membership @ GFLClan.com to remove MOTD ads!", VPPADSURL, MOTDPANEL_TYPE_URL);
 	}
+}
+
+/* Command: sm_ads (Displays the ad MOTD window). */
+public Action Command_Ads(int iClient, int iArgs)
+{
+	/* Display the ads window. */
+	ShowMOTDPanel(iClient, "Thank you for supporting us!", VPPADSURL, MOTDPANEL_TYPE_URL);
+	
+	/* Reply to the client. */
+	CReplyToCommand(iClient, "%t", "AdSupport");
+	
+	return Plugin_Handled;
 }
 
 /* Snippet found from lab.gflclan.com. */

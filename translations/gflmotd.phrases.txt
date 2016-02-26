@@ -1,0 +1,7 @@
+"Phrases"
+{
+	"AdSupport"
+	{
+		"en"	"{lightgreen}[GFL] {default}Thank you for supporting us!"
+	}
+}

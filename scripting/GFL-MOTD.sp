@@ -208,7 +208,11 @@ public void FrameHook_AfterMOTD(any serial)
 	KvSetString(hKV, "cmd", sCloseCommand);
  
 	KvSetString(hKV, "msg", VPPADSURL);
-	KvSetString(hKV, "title", "Apply for Membership @ GFLClan.com to remove MOTD ads!");
+	
+	char sTitle[256];
+	Format(sTitle, sizeof(sTitle), "%t", RemoveAds);
+	
+	KvSetString(hKV, "title", sTitle;
 	KvSetNum(hKV, "type", MOTDPANEL_TYPE_URL);
  
 	ShowVGUIPanel(iClient, "info", hKV);

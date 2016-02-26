@@ -4,4 +4,9 @@
 	{
 		"en"	"{lightgreen}[GFL] {default}Thank you for supporting us!"
 	}
+	
+	"RemoveAds"
+	{
+		"en"	"Apply for Membership @ GFLClan.com to remove MOTD ads!"
+	}
 }

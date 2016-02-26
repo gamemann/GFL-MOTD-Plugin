@@ -42,6 +42,7 @@ public void OnPluginStart()
 	
 	/* Commands. */
 	RegConsoleCmd("sm_ads", Command_Ads);
+	RegConsoleCmd("sm_motdtest", Command_MOTDTest);
 	
 	/* Load the translations file. */
 	LoadTranslations("gflmotd.phrases.txt");
@@ -103,6 +104,14 @@ public Action Command_Ads(int iClient, int iArgs)
 	
 	/* Reply to the client. */
 	CReplyToCommand(iClient, "%t", "AdSupport");
+	
+	return Plugin_Handled;
+}
+
+/* Command: sm_motdtest (Test for Peace-Maker!). */
+public Action Command_MOTDTest(int iClient, int iArgs)
+{
+	ShowMOTDPanel(iClient, "Test", "Hi, you got HTML MOTDs disabled :'(", MOTDPANEL_TYPE_TEXT);
 	
 	return Plugin_Handled;
 }

@@ -117,8 +117,13 @@ public Action Command_MOTDTest(int iClient, int iArgs)
 }
 
 /* The MOTD User Message. */
-public Action:OnMsgVGUIMenu(UserMsg msg_id, Handle hSelf, const int[] iPlayers, int iPlayersNum, bool bReliable, bool bInit)
+public Action OnMsgVGUIMenu(UserMsg msg_id, Handle hSelf, const int[] iPlayers, int iPlayersNum, bool bReliable, bool bInit)
 {
+	#if defined DEBUG then
+		/* Log a message. */
+		LogMessage("OnMsgVGUIMenu() executed.");
+	#endif
+	
 	int iClient = iPlayers[0];
 	
 	/* Check if the player(s) are valid. */

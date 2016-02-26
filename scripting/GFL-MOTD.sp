@@ -2,7 +2,12 @@
 #include <sdktools>
 #include <multicolors>
 
+#undef REQUIRE_PLUGIN
+#include <updater>
+
 #define VPPADSURL "http://vppgamingnetwork.com/Client/Content/1151"
+#define UPDATEURL "http://GFLClan.com/updater/motdplugin/core.txt"
+#define DEBUG
 
 public Plugin myinfo =
 {
@@ -19,6 +24,12 @@ bool g_bNoMOTDYet[MAXPLAYERS+1];
 
 public void OnPluginStart()
 {
+	/* Add the updater to the plugin. */
+	if (LibraryExists("updater"))
+	{
+		Updater_AddPlugin(UPDATEURL);
+	}
+	
 	/* Set up the user messages. */
 	UserMsg VGUIMenu = GetUserMessageId("VGUIMenu");
 	
@@ -39,6 +50,14 @@ public void OnPluginStart()
 	//AutoExecConfig(true, "plugin.gfl-motd");
 }
 
+/* Add the updater to the plugin. */
+public void OnLibraryAdded(const char[] sName)
+{
+	if (StrEqual(sName, "updater", false))
+	{
+		Updater_AddPlugin(UPDATEURL);
+	}
+}
 /* Called when a client is authorized. */
 public void OnClientPostAdminCheck(int iClient)
 {
@@ -141,6 +160,10 @@ public Action:OnMsgVGUIMenu(UserMsg msg_id, Handle hSelf, const int[] iPlayers, 
 			PbReadString(hSubKey, "name", sKey, sizeof(sKey));
 			PbReadString(hSubKey, "str", sValue, sizeof(sValue));
 			KvSetString(hKV, sKey, sValue);
+			
+			#if defined DEBUG then
+				LogMessage("%s: %s", sKey, sValue);
+			#endif
 		}
 	}
 	else
@@ -210,9 +233,9 @@ public void FrameHook_AfterMOTD(any serial)
 	KvSetString(hKV, "msg", VPPADSURL);
 	
 	char sTitle[256];
-	Format(sTitle, sizeof(sTitle), "%t", RemoveAds);
+	Format(sTitle, sizeof(sTitle), "%t", "RemoveAds");
 	
-	KvSetString(hKV, "title", sTitle;
+	KvSetString(hKV, "title", sTitle);
 	KvSetNum(hKV, "type", MOTDPANEL_TYPE_URL);
  
 	ShowVGUIPanel(iClient, "info", hKV);

@@ -99,8 +99,12 @@ public void OnClientDisconnect(int iClient)
 /* Command: sm_ads (Displays the ad MOTD window). */
 public Action Command_Ads(int iClient, int iArgs)
 {
+	/* Set the URL. */
+	char sURL[256];
+	Format(sURL, sizeof(sURL), "http://GFLClan.com/updater/motdplugin/web/redirect.php?url=%s", VPPADSURL);
+	
 	/* Display the ads window. */
-	//FrameHook_AfterMOTD(GetClientSerial(iClient));
+	ShowMOTDPanel(iClient, "Thank you for supporting us!", sURL, MOTDPANEL_TYPE_URL);
 	
 	/* Reply to the client. */
 	CReplyToCommand(iClient, "%t", "AdSupport");

@@ -49,6 +49,7 @@ public void OnPluginStart()
 	
 	/* Client Cookies. */
 	g_hOverrideAds = RegClientCookie("gflmotd_override", "Overrides Members+ with advertisements if they would like.", CookieAccess_Protected);
+	SetCookieMenuItem(CookieMenuHandler, 0, "Override Adverts Toggle"); 
 	
 	/* Cookies Late Loading. */
 	for (int i = MaxClients; i > 0; --i)
@@ -71,6 +72,54 @@ public void OnPluginStart()
 	
 	/* Execute a config. */
 	//AutoExecConfig(true, "plugin.gfl-motd");
+}
+
+/* The Cookie Menu handler. */
+public void CookieMenuHandler(int iClient, CookieMenuAction action, any info, char[] sBuffer, int iMaxLen)
+{
+	switch (action)
+	{
+		case CookieMenuAction_DisplayOption:
+		{
+		}
+
+		case CookieMenuAction_SelectOption:
+		{
+			if (HasPermission(iClient, "t"))
+			{
+				/* Check whether overriding is enabled/disabled. */
+				if (g_bOverrideAds[iClient])
+				{
+					/* Set the cookie's value. */
+					SetClientCookie(iClient, g_hOverrideAds, "0");
+					
+					/* Set the bool to false. */
+					g_bOverrideAds[iClient] = false;
+					
+					/* Reply to the client. */
+					CPrintToChat(iClient, "%t%t", "Tag", "OverrideDisabled");
+				}
+				else
+				{
+					/* Set the cookie's value. */
+					SetClientCookie(iClient, g_hOverrideAds, "1");
+					
+					/* Set the bool to true. */
+					g_bOverrideAds[iClient] = true;
+					
+					/* Reply to the client. */
+					CPrintToChat(iClient, "%t%t", "Tag", "OverrideEnabled");
+				}
+				
+				/* Refresh the cookie value. */
+				OnClientCookiesCached(iClient);
+			}
+			else
+			{
+				CPrintToChat(iClient, "%t%t", "Tag", "NotAMember");
+			}
+		}
+	}
 }
 
 /* Handle the cookies. */

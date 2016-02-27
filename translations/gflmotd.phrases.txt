@@ -1,12 +1,32 @@
 "Phrases"
 {
+	"Tag"
+	{
+		"en"	"{lightgreen}[GFL] "
+	}
+	
 	"AdSupport"
 	{
-		"en"	"{lightgreen}[GFL] {default}Thank you for supporting us!"
+		"en"	"{default}Thank you for {lightred}supporting {default}us!"
 	}
 	
 	"RemoveAds"
 	{
 		"en"	"Apply for Membership @ GFLClan.com to remove MOTD ads!"
+	}
+	
+	"NotAMember"
+	{
+		"en"	"{default}You are not a {lightred}Member+{default}. Please apply for Membership @ {lightred}GFLClan.com{default}!"
+	}
+	
+	"OverrideEnabled"
+	{
+		"en"	"{default}You have {lightgreen}enabled {default}overriding advertisements! You will now see MOTD Advertisements. Thank you for your {lightred}support{default}!"
+	}	
+	
+	"OverrideDisabled"
+	{
+		"en"	"{default}You have {lightred}disabled {default}overriding advertisements. You will no longer see {lightred}MOTD Ads{default}."
 	}
 }

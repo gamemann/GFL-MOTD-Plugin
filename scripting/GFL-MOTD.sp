@@ -1,6 +1,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <multicolors>
+#include <clientprefs>
 
 #undef REQUIRE_PLUGIN
 #include <updater>
@@ -17,6 +18,12 @@ public Plugin myinfo =
 	version = "1.0.0",
 	url = "http://GFLClan.com/"
 };
+
+/* Client Cookies. */
+Handle g_hOverrideAds = null;
+
+/* Cookie Values. */
+bool g_bOverrideAds[MAXPLAYERS+1];
 
 /* Other Variables. */
 Handle g_hDefaultMOTD[MAXPLAYERS+1];
@@ -40,15 +47,41 @@ public void OnPluginStart()
 	
 	HookUserMessage(VGUIMenu, OnMsgVGUIMenu, true);
 	
+	/* Client Cookies. */
+	g_hOverrideAds = RegClientCookie("gflmotd_override", "Overrides Members+ with advertisements if they would like.", CookieAccess_Protected);
+	
+	/* Cookies Late Loading. */
+	for (int i = MaxClients; i > 0; --i)
+	{
+		if (!AreClientCookiesCached(i))
+		{
+			continue;
+		}
+		
+		OnClientCookiesCached(i);
+	}
+	
 	/* Commands. */
 	RegConsoleCmd("sm_ads", Command_Ads);
 	RegConsoleCmd("sm_motdtest", Command_MOTDTest);
+	RegConsoleCmd("sm_overrideads", Command_OverrideAds);
 	
 	/* Load the translations file. */
 	LoadTranslations("gflmotd.phrases.txt");
 	
 	/* Execute a config. */
 	//AutoExecConfig(true, "plugin.gfl-motd");
+}
+
+/* Handle the cookies. */
+public int OnClientCookiesCached(int iClient)
+{
+	/* Receive the client's cookie. */
+	char sValue[8];
+	GetClientCookie(iClient, g_hOverrideAds, sValue, sizeof(sValue));
+	
+	/* Set the value. If the cookie is defined and the value is 1, set the override to true for the specific client. */
+	g_bOverrideAds[iClient] = (sValue[0] != '\0' && StringToInt(sValue));
 }
 
 /* Add the updater to the plugin. */
@@ -71,7 +104,7 @@ public void OnClientPostAdminCheck(int iClient)
 	g_bNoMOTDYet[iClient] = false;
 	
 	/* Check whether the player is a Member+ or not. */
-	if (HasPermission(iClient, "t"))
+	if (HasPermission(iClient, "t") && !g_bOverrideAds[iClient])
 	{
 		/* User is a member. Use the NormalMOTD ConVar's value as the MOTD link. */
 		ShowDefaultMOTD(iClient);
@@ -107,7 +140,7 @@ public Action Command_Ads(int iClient, int iArgs)
 	ShowMOTDPanel(iClient, "Thank you for supporting us!", sURL, MOTDPANEL_TYPE_URL);
 	
 	/* Reply to the client. */
-	CReplyToCommand(iClient, "%t", "AdSupport");
+	CReplyToCommand(iClient, "%t%t", "Tag", "AdSupport");
 	
 	return Plugin_Handled;
 }
@@ -116,6 +149,43 @@ public Action Command_Ads(int iClient, int iArgs)
 public Action Command_MOTDTest(int iClient, int iArgs)
 {
 	ShowMOTDPanel(iClient, "Test", "Hi, you got HTML MOTDs disabled :'(", MOTDPANEL_TYPE_TEXT);
+	
+	return Plugin_Handled;
+}
+
+/* Command: sm_overrideads (Overrides the ads for the client if a Member+!). */
+public Action Command_OverrideAds(int iClient, int iArgs)
+{
+	if (!HasPermission(iClient, "t"))
+	{
+		CReplyToCommand(iClient, "%t%t", "Tag", "NotAMember");
+		
+		return Plugin_Handled;
+	}
+	
+	/* Enable/Disable Ads. */
+	if (g_bOverrideAds[iClient])
+	{
+		/* Set the cookie's value. */
+		SetClientCookie(iClient, g_hOverrideAds, "0");
+		
+		/* Set the bool to false. */
+		g_bOverrideAds[iClient] = false;
+		
+		/* Reply to the client. */
+		CReplyToCommand(iClient, "%t%t", "Tag", "OverrideDisabled");
+	}
+	else
+	{
+		/* Set the cookie's value. */
+		SetClientCookie(iClient, g_hOverrideAds, "1");
+		
+		/* Set the bool to true. */
+		g_bOverrideAds[iClient] = true;
+		
+		/* Reply to the client. */
+		CReplyToCommand(iClient, "%t%t", "Tag", "OverrideEnabled");
+	}
 	
 	return Plugin_Handled;
 }
@@ -210,7 +280,7 @@ public Action OnMsgVGUIMenu(UserMsg msg_id, Handle hSelf, const int[] iPlayers, 
 	if (IsClientAuthorized(iClient))
 	{
 		/* This is a Member - show him the default motd.txt. */
-		if (HasPermission(iClient, "t"))
+		if (HasPermission(iClient, "t") && !g_bOverrideAds[iClient])
 		{
 			return Plugin_Continue;
 		}

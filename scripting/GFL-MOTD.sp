@@ -7,7 +7,7 @@
 
 #define VPPADSURL "http://vppgamingnetwork.com/Client/Content/1151"
 #define UPDATEURL "http://GFLClan.com/updater/motdplugin/core.txt"
-#define DEBUG
+//#define DEBUG
 
 public Plugin myinfo =
 {

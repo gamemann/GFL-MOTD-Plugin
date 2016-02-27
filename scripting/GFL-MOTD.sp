@@ -163,7 +163,7 @@ public Action OnMsgVGUIMenu(UserMsg msg_id, Handle hSelf, const int[] iPlayers, 
 		BfReadByte(hSelf);
 	}
  
-	// Remember the key value data of this vguimenu. That way we can display the old motd, if the client isn't authenticated yet.
+	/* Remember the key value data of this vguimenu. That way we can display the old motd, if the client isn't authenticated yet. */
 	Handle hKV = CreateKeyValues("data");
  
 	if (GetUserMessageType() == UM_Protobuf)
@@ -266,7 +266,7 @@ ShowDefaultMOTD(int iClient)
 {
 	if(g_hDefaultMOTD[iClient] != null)
 	{
-		// Show the default motd.txt
+		/* Show the default motd.txt. */
 		ShowVGUIPanel(iClient, "info", g_hDefaultMOTD[iClient]);
 	}
 }

@@ -29,6 +29,12 @@ Handle g_hDefaultMOTD[MAXPLAYERS+1];
 bool g_bNoMOTDYet[MAXPLAYERS+1];
 char g_sURL[256];
 int g_iAdType = 2;	/* 1 = VPP, 2 = MOTDGD, ... */
+Handle g_hServerIP = null;
+Handle g_hServerPort = null;
+int g_iServerIP;
+int g_iServerPort;
+char g_sFullServerIP[16];
+char g_sGameDir[MAX_NAME_LENGTH];
 
 public void OnPluginStart()
 {
@@ -70,6 +76,21 @@ public void OnPluginStart()
 	
 	/* Load the translations file. */
 	LoadTranslations("gflmotd.phrases.txt");
+	
+	/* Get the Server's IP and Port. */
+	g_hServerIP = FindConVar("hostip");
+	g_hServerPort = FindConVar("hostport");
+		
+	if (g_hServerIP != null && g_hServerPort != null)
+	{
+		g_iServerIP = GetConVarInt(g_hServerIP);
+		g_iServerPort = GetConVarInt(g_hServerPort);
+			
+		Format(g_sFullServerIP, sizeof(g_sFullServerIP), "%d.%d.%d.%d", g_iServerIP >>> 24 & 255, g_iServerIP >>> 16 & 255, g_iServerIP >>> 8 & 255, g_iServerIP & 255);
+	}
+	
+	/* Get the Server's Game Directory. */
+	GetGameFolderName(g_sGameDir, sizeof(g_sGameDir));
 	
 	/* Execute a config. */
 	//AutoExecConfig(true, "plugin.gfl-motd");
@@ -434,47 +455,27 @@ stock void FormatURL(int iClient)
 	{
 		/* MOTDGD Ads. */
 		
-		/* We must get some information first. */
-		/* Get the Server IP and Port. */
-		Handle hServerIP = FindConVar("hostip");
-		Handle hServerPort = FindConVar("hostport");
+		/* We must get some information first. */	
+		/* Now get the client's username and Steam ID. */
+		char sSteamID[64];
+		char sName[MAX_NAME_LENGTH];
+		char sNameEncoded[MAX_NAME_LENGTH * 2];
 		
-		if (hServerIP != null && hServerPort != null)
+		bool bGotSteamID = GetClientAuthId(iClient, AuthId_Steam2, sSteamID, sizeof(sSteamID));
+		
+		GetClientName(iClient, sName, sizeof(sName));
+		urlencode(sName, sNameEncoded, sizeof(sNameEncoded));
+			
+		/* Finally, format the URL. */
+		if (bGotSteamID)
 		{
-			int iServerIP = GetConVarInt(hServerIP);
-			int iServerPort = GetConVarInt(hServerPort);
-			char sFullServerIP[16];
-			
-			Format(sFullServerIP, sizeof(sFullServerIP), "%d.%d.%d.%d", iServerIP >>> 24 & 255, iServerIP >>> 16 & 255, iServerIP >>> 8 & 255, iServerIP & 255);
-			
-			/* Now get the client's username and Steam ID. */
-			char sSteamID[64];
-			char sName[MAX_NAME_LENGTH];
-			char sNameEncoded[MAX_NAME_LENGTH * 2];
-			
-			bool bGotSteamID = GetClientAuthId(iClient, AuthId_Steam2, sSteamID, sizeof(sSteamID));
-			
-			GetClientName(iClient, sName, sizeof(sName));
-			urlencode(sName, sNameEncoded, sizeof(sNameEncoded));
-			
-			/* Get the Game Directory. */
-			char sGameDir[255];
-			GetGameFolderName(sGameDir, sizeof(sGameDir));
-			
-			/* Finally, format the URL. */
-			if (bGotSteamID)
-			{
-				Format(g_sURL, sizeof(g_sURL), "http://motdgd.com/motd/?user=9038&ip=%s&pt=%d&v=2.3.5&st=%s&gm=%s&name=%s", sFullServerIP, iServerPort, sSteamID, sGameDir, sNameEncoded);
-			}
-			else
-			{
-				Format(g_sURL, sizeof(g_sURL), "http://motdgd.com/motd/?user=9038&ip=%s&pt=%d&v=2.3.5&gm=%s&name=%s", sFullServerIP, iServerPort, sGameDir, sNameEncoded);
-			}
-			
-			/* Close everything. */
-			delete (hServerIP);
-			delete (hServerPort);
+			Format(g_sURL, sizeof(g_sURL), "http://motdgd.com/motd/?user=9038&ip=%s&pt=%d&v=2.3.5&st=%s&gm=%s&name=%s", g_sFullServerIP, g_iServerPort, sSteamID, g_sGameDir, sNameEncoded);
 		}
+		else
+		{
+			Format(g_sURL, sizeof(g_sURL), "http://motdgd.com/motd/?user=9038&ip=%s&pt=%d&v=2.3.5&gm=%s&name=%s", g_sFullServerIP, g_iServerPort, g_sGameDir, sNameEncoded);
+		}
+			
 	}
 	
 	#if defined DEBUG then

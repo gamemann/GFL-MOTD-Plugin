@@ -6,7 +6,6 @@
 #undef REQUIRE_PLUGIN
 #include <updater>
 
-#define VPPADSURL "http://vppgamingnetwork.com/Client/Content/1151"
 #define UPDATEURL "http://GFLClan.com/updater/motdplugin/core.txt"
 //#define DEBUG
 
@@ -28,6 +27,8 @@ bool g_bOverrideAds[MAXPLAYERS+1];
 /* Other Variables. */
 Handle g_hDefaultMOTD[MAXPLAYERS+1];
 bool g_bNoMOTDYet[MAXPLAYERS+1];
+char g_sURL[256];
+int g_iAdType = 2;	/* 1 = VPP, 2 = MOTDGD, ... */
 
 public void OnPluginStart()
 {
@@ -181,9 +182,12 @@ public void OnClientDisconnect(int iClient)
 /* Command: sm_ads (Displays the ad MOTD window). */
 public Action Command_Ads(int iClient, int iArgs)
 {
+	/* Refresh the URL. */
+	FormatURL(iClient);
+	
 	/* Set the URL. */
 	char sURL[256];
-	Format(sURL, sizeof(sURL), "http://GFLClan.com/updater/motdplugin/web/redirect.php?url=%s", VPPADSURL);
+	Format(sURL, sizeof(sURL), "http://GFLClan.com/updater/motdplugin/web/redirect.php?url=%s", g_sURL);
 	
 	/* Display the ads window. */
 	ShowMOTDPanel(iClient, "Thank you for supporting us!", sURL, MOTDPANEL_TYPE_URL);
@@ -358,6 +362,9 @@ public void FrameHook_AfterMOTD(any serial)
 	{
 		return;
 	}
+	
+	/* Format the URL. */
+	FormatURL(iClient);
  
 	/* Craft a nice fake MOTD. */
 	Handle hKV = CreateKeyValues("data");
@@ -367,7 +374,7 @@ public void FrameHook_AfterMOTD(any serial)
 	KvGetString(g_hDefaultMOTD[iClient], "cmd", sCloseCommand, sizeof(sCloseCommand));
 	KvSetString(hKV, "cmd", sCloseCommand);
  
-	KvSetString(hKV, "msg", VPPADSURL);
+	KvSetString(hKV, "msg", g_sURL);
 	
 	char sTitle[256];
 	Format(sTitle, sizeof(sTitle), "%t", "RemoveAds");
@@ -414,3 +421,105 @@ stock bool HasPermission(int iClient, char[] sFlagString)
 
 	return false;
 }
+
+/* Formats the Ad URL. */
+stock void FormatURL(int iClient)
+{
+	if (g_iAdType == 1)
+	{
+		/* VPP Ads. */
+		Format(g_sURL, sizeof(g_sURL), "http://vppgamingnetwork.com/Client/Content/1151");
+	}
+	else if (g_iAdType == 2)
+	{
+		/* MOTDGD Ads. */
+		
+		/* We must get some information first. */
+		/* Get the Server IP and Port. */
+		Handle hServerIP = FindConVar("hostip");
+		Handle hServerPort = FindConVar("hostport");
+		
+		if (hServerIP != null && hServerPort != null)
+		{
+			int iServerIP = GetConVarInt(hServerIP);
+			int iServerPort = GetConVarInt(hServerPort);
+			char sFullServerIP[16];
+			
+			Format(sFullServerIP, sizeof(sFullServerIP), "%d.%d.%d.%d", iServerIP >>> 24 & 255, iServerIP >>> 16 & 255, iServerIP >>> 8 & 255, iServerIP & 255);
+			
+			/* Now get the client's username and Steam ID. */
+			char sSteamID[64];
+			char sName[MAX_NAME_LENGTH];
+			char sNameEncoded[MAX_NAME_LENGTH * 2];
+			
+			bool bGotSteamID = GetClientAuthId(iClient, AuthId_Steam2, sSteamID, sizeof(sSteamID));
+			
+			GetClientName(iClient, sName, sizeof(sName));
+			urlencode(sName, sNameEncoded, sizeof(sNameEncoded));
+			
+			/* Get the Game Directory. */
+			char sGameDir[255];
+			GetGameFolderName(sGameDir, sizeof(sGameDir));
+			
+			/* Finally, format the URL. */
+			if (bGotSteamID)
+			{
+				Format(g_sURL, sizeof(g_sURL), "http://motdgd.com/motd/?user=9038&ip=%s&pt=%d&v=2.3.5&st=%s&gm=%s&name=%s", sFullServerIP, iServerPort, sSteamID, sGameDir, sNameEncoded);
+			}
+			else
+			{
+				Format(g_sURL, sizeof(g_sURL), "http://motdgd.com/motd/?user=9038&ip=%s&pt=%d&v=2.3.5&gm=%s&name=%s", sFullServerIP, iServerPort, sGameDir, sNameEncoded);
+			}
+			
+			/* Close everything. */
+			delete (hServerIP);
+			delete (hServerPort);
+		}
+	}
+	
+	#if defined DEBUG then
+		/* Log a message. */
+		LogMessage("Formatting URL: %s", g_sURL);
+	#endif
+}
+
+/* Found from the MOTDGD plugin. Though, I did reformat it for the new SourceMod syntax. */
+stock void urlencode(const char[] sString, char[] sResult, int iLen)
+{
+	char[] sHexTable = "0123456789abcdef";
+	int from, c;
+	int to;
+
+	while(from < iLen)
+	{
+		c = sString[from++];
+		
+		if(c == 0)
+		{
+			sResult[to++] = c;
+			break;
+		}
+		else if(c == ' ')
+		{
+			sResult[to++] = '+';
+		}
+		else if((c < '0' && c != '-' && c != '.') ||
+				(c < 'A' && c > '9') ||
+				(c > 'Z' && c < 'a' && c != '_') ||
+				(c > 'z'))
+		{
+			if((to + 3) > iLen)
+			{
+				sResult[to] = 0;
+				break;
+			}
+			sResult[to++] = '%';
+			sResult[to++] = sHexTable[c >> 4];
+			sResult[to++] = sHexTable[c & 15];
+		}
+		else
+		{
+			sResult[to++] = c;
+		}
+	}
+}  

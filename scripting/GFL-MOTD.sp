@@ -14,7 +14,7 @@ public Plugin myinfo =
 	name = "[GFL] MOTD Links",
 	author = "Roy (Christian Deacon) and Peace-Maker",
 	description = "Dynamic MOTD links.",
-	version = "1.0.1",
+	version = "1.0.2",
 	url = "http://GFLClan.com/"
 };
 

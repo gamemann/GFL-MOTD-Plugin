@@ -211,8 +211,6 @@ public Action Command_Ads(int iClient, int iArgs)
 	char sURL[256];
 	Format(sURL, sizeof(sURL), "%s?url=%s", REDIRECTURL, g_sURL);
 	
-	PrintToServer("Ad URL: %s", sURL);
-	
 	/* Display the ads window. */
 	ShowMOTDPanel(iClient, "Thank you for supporting us!", sURL, MOTDPANEL_TYPE_URL);
 	

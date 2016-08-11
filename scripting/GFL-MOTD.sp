@@ -6,7 +6,8 @@
 #undef REQUIRE_PLUGIN
 #include <updater>
 
-#define UPDATEURL "http://GFLClan.com/updater/motdplugin/core.txt"
+#define UPDATEURL "http://updater.gflclan.com/GFL-MOTD.txt"
+#define REDIRECTURL "http://fastdl.gflclan.com/redirect.html"
 //#define DEBUG
 
 public Plugin myinfo =
@@ -14,7 +15,7 @@ public Plugin myinfo =
 	name = "[GFL] MOTD Links",
 	author = "Roy (Christian Deacon) and Peace-Maker",
 	description = "Dynamic MOTD links.",
-	version = "1.0.2",
+	version = "1.0.3",
 	url = "http://GFLClan.com/"
 };
 
@@ -145,7 +146,7 @@ public void CookieMenuHandler(int iClient, CookieMenuAction action, any info, ch
 }
 
 /* Handle the cookies. */
-public int OnClientCookiesCached(int iClient)
+public void OnClientCookiesCached(int iClient)
 {
 	/* Receive the client's cookie. */
 	char sValue[8];
@@ -208,7 +209,9 @@ public Action Command_Ads(int iClient, int iArgs)
 	
 	/* Set the URL. */
 	char sURL[256];
-	Format(sURL, sizeof(sURL), "http://GFLClan.com/updater/motdplugin/web/redirect.php?url=%s", g_sURL);
+	Format(sURL, sizeof(sURL), "%s?url=%s", REDIRECTURL, g_sURL);
+	
+	PrintToServer("Ad URL: %s", sURL);
 	
 	/* Display the ads window. */
 	ShowMOTDPanel(iClient, "Thank you for supporting us!", sURL, MOTDPANEL_TYPE_URL);

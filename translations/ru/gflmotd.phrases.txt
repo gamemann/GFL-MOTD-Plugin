@@ -1,0 +1,32 @@
+"Phrases"
+{
+	"Tag"
+	{
+		"ru"	"{lightgreen}[GFL] "
+	}
+	
+	"AdSupport"
+	{
+		"ru"	"{default}Спасибо, что {lightred}поддерживаете {default}нас!"
+	}
+	
+	"RemoveAds"
+	{
+		"ru"	"Подайте заявку на Membership @ GFLClan.com, чтобы удалить рекламу MOTD!"
+	}
+	
+	"NotAMember"
+	{
+		"ru"	"{default}Вы не {lightred}Member+{default}. Пожалуйста, подайте заявку на Membership @ {lightred}GFLClan.com{default}!"
+	}
+	
+	"OverrideEnabled"
+	{
+		"ru"	"{default}У вас {lightgreen}включено {default}переопределение рекламы! Теперь вы увидите рекламу MOTD. Спасибо за вашу {lightred}поддержку{default}!"
+	}	
+	
+	"OverrideDisabled"
+	{
+		"ru"	"{default}У вас {lightred}отключено {default}переопределение рекламы. Вы больше не будете видеть {lightred}рекламу MOTD{default}."
+	}
+}
